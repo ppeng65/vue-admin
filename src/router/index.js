@@ -1,22 +1,50 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
-import Home from '../views/Home.vue'
+import Layout from '../layout'
 
 Vue.use(VueRouter)
+
+const requireApi = require.context('.', false, /\.js$/)
+const routesLists = []
+requireApi.keys().forEach(item => {
+  if (item === './index.js') {
+    return
+  }
+  routesLists.push(...requireApi(item).default)
+})
 
 const routes = [
   {
     path: '/',
-    name: 'Home',
-    component: Home
+    component: Layout,
+    redirect: '/index',
+    children: [
+      {
+        path: 'index',
+        name: 'Index',
+        component: () => import('../views/index/index.vue')
+      },
+      {
+        path: 'pageA',
+        name: 'PageA',
+        component: () => import('../views/pageA/index.vue')
+      }
+    ]
   },
   {
-    path: '/about',
-    name: 'About',
-    // route level code-splitting
-    // this generates a separate chunk (about.[hash].js) for this route
-    // which is lazy-loaded when the route is visited.
-    component: () => import(/* webpackChunkName: "about" */ '../views/About.vue')
+    path: '/login',
+    name: 'Login',
+    component: () => import('../views/login/index.vue')
+  },
+  {
+    path: '/404',
+    name: 'Error',
+    component: () => import('../views/error/index.vue')
+  },
+  ...routesLists,
+  {
+    path: '*',
+    redirect: '/404'
   }
 ]
 
